@@ -1,0 +1,26 @@
+[package]
+name = "gemini-chat-api"
+version = "0.1.0"
+edition = "2021"
+description = "Async Rust client for Google Gemini Chat API"
+license = "MIT"
+repository = "https://github.com/OEvortex/Gemini-Chat-API"
+keywords = ["gemini", "google", "ai", "chat", "api"]
+categories = ["api-bindings", "asynchronous"]
+
+[dependencies]
+reqwest = { version = "0.12", features = ["cookies", "json", "rustls-tls", "multipart"], default-features = false }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+regex = "1"
+thiserror = "2"
+rand = "0.8"
+url = "2"
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[[example]]
+name = "chat"
+path = "examples/chat.rs"
