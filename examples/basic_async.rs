@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut chatbot = AsyncChatbot::new(
         &secure_1psid,
         &secure_1psidts,
-        Model::G2_5Pro,
+        Model::G3_0Pro,
         None, // No proxy
         30,   // Timeout in seconds
     )
@@ -21,8 +21,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Chatbot initialized.");
 
     // Ask a question
-    println!("Sending message: 'Hello from Rust example!'");
-    let response = chatbot.ask("Hello from Rust example!", None).await?;
+    println!("Sending message: 'Hello how are you?'");
+    let response = chatbot.ask("Hello how are you?", None).await?;
 
     println!("--------------------------------------------------");
     println!("Gemini Response:");

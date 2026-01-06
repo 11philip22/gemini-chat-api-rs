@@ -7,7 +7,7 @@ use std::io::{self, Write};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load cookies from cookies.json (copy from your Python project)
     let cookie_path = "cookies.json";
-    
+
     println!("Loading cookies from {}...", cookie_path);
     let (psid, psidts) = load_cookies(cookie_path)?;
     println!("Cookies loaded successfully.");
@@ -17,9 +17,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut chatbot = AsyncChatbot::new(
         &psid,
         &psidts,
-        Model::G2_0Flash, // or Model::default() for unspecified
-        None,             // No proxy
-        30,               // 30 second timeout
+        Model::G3_0Pro, // or Model::default() for unspecified
+        None,           // No proxy
+        30,             // 30 second timeout
     )
     .await?;
     println!("Chatbot initialized successfully!\n");

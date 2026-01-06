@@ -122,6 +122,12 @@ pub enum Model {
     G2_0ExpAdvanced,
     /// Gemini 2.5 Experimental Advanced (requires advanced subscription)
     G2_5ExpAdvanced,
+    /// Gemini 3.0 Pro
+    G3_0Pro,
+    /// Gemini 3.0 Flash
+    G3_0Flash,
+    /// Gemini 3.0 Flash Thinking
+    G3_0Thinking,
 }
 
 impl Model {
@@ -135,6 +141,9 @@ impl Model {
             Model::G2_5Pro => "gemini-2.5-pro",
             Model::G2_0ExpAdvanced => "gemini-2.0-exp-advanced",
             Model::G2_5ExpAdvanced => "gemini-2.5-exp-advanced",
+            Model::G3_0Pro => "gemini-3.0-pro",
+            Model::G3_0Flash => "gemini-3.0-flash",
+            Model::G3_0Thinking => "gemini-3.0-flash-thinking",
         }
     }
 
@@ -148,6 +157,15 @@ impl Model {
             Model::G2_5Pro => r#"[1,null,null,null,"2525e3954d185b3c"]"#,
             Model::G2_0ExpAdvanced => r#"[null,null,null,null,"b1e46a6037e6aa9f"]"#,
             Model::G2_5ExpAdvanced => r#"[null,null,null,null,"203e6bb81620bcfe"]"#,
+            Model::G3_0Pro => {
+                r#"[1,null,null,null,"e6fa609c3fa255c0",null,null,0,[4],null,null,2]"#
+            }
+            Model::G3_0Thinking => {
+                r#"[1,null,null,null,"e051ce1aa80aa576",null,null,0,[4],null,null,2]"#
+            }
+            Model::G3_0Flash => {
+                r#"[1,null,null,null,"56fdd199312815e2",null,null,0,[4],null,null,2]"#
+            }
         };
 
         let mut headers = HeaderMap::new();
@@ -173,6 +191,9 @@ impl Model {
             "gemini-2.5-pro" => Some(Model::G2_5Pro),
             "gemini-2.0-exp-advanced" => Some(Model::G2_0ExpAdvanced),
             "gemini-2.5-exp-advanced" => Some(Model::G2_5ExpAdvanced),
+            "gemini-3.0-pro" => Some(Model::G3_0Pro),
+            "gemini-3.0-flash" => Some(Model::G3_0Flash),
+            "gemini-3.0-thinking" => Some(Model::G3_0Thinking),
             _ => None,
         }
     }
