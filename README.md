@@ -2,8 +2,6 @@
 
 This Rust crate provides a client for interacting with Google's Gemini API. It is a port of the [Python gemini-chat-api](https://github.com/OEvortex/Gemini-Chat-API) and is built using `reqwest` for efficient and authenticated HTTP requests.
 
-> **Note**: This library is generated using Gemini AI so may contain errors or bugs.
-
 ## Features
 
 - **Asynchronous**: Built on `tokio` and `reqwest` for non-blocking I/O.
