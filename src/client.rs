@@ -563,6 +563,15 @@ impl AsyncChatbot {
     pub fn model(&self) -> &Model {
         &self.model
     }
+
+    /// Resets the conversation state (IDs) to start a fresh conversation session.
+    /// This keeps authentication valid (SNlM0e, cookies) but generates new conversation IDs.
+    pub fn reset(&mut self) {
+        self.conversation_id.clear();
+        self.response_id.clear();
+        self.choice_id.clear();
+        self.reqid = rand::thread_rng().gen_range(1000000..9999999);
+    }
 }
 
 /// Simple timestamp function (avoids adding chrono dependency).
