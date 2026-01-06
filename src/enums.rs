@@ -1,8 +1,8 @@
 //! Enums and constants for Gemini API endpoints, headers, and models.
 
 use reqwest::header::{
-    HeaderMap, HeaderName, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, HOST, ORIGIN,
-    REFERER, USER_AGENT,
+    HeaderMap, HeaderName, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, ORIGIN, REFERER,
+    USER_AGENT,
 };
 
 /// API endpoints for Google Gemini.
@@ -37,7 +37,7 @@ pub fn gemini_headers() -> HeaderMap {
         CONTENT_TYPE,
         HeaderValue::from_static("application/x-www-form-urlencoded;charset=utf-8"),
     );
-    headers.insert(HOST, HeaderValue::from_static("gemini.google.com"));
+
     headers.insert(
         ORIGIN,
         HeaderValue::from_static("https://gemini.google.com"),
