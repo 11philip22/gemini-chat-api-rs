@@ -96,7 +96,3 @@ async fn main() -> Result<(), Box<dyn Error>> {
 - **`enums`**: Defines `Endpoint`, `Headers`, and `Model` enums.
 - **`utils`**: Helpers like `load_cookies` and `upload_file`.
 - **`error`**: Custom `Error` types.
-
-## License
-
-MIT
