@@ -1,5 +1,8 @@
 # Gemini Chat API (Rust)
 
+[![Crates.io](https://img.shields.io/crates/v/gemini-chat-api.svg)](https://crates.io/crates/gemini-chat-api)
+[![Documentation](https://docs.rs/gemini-chat-api/badge.svg)](https://docs.rs/gemini-chat-api)
+
 This Rust crate provides an unofficial client for interacting with Google's internal Gemini API. It is a port of the [Python gemini-chat-api](https://github.com/OEvortex/Gemini-Chat-API) and is built using `reqwest` for efficient and authenticated HTTP requests.
 
 ## Features
@@ -19,7 +22,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gemini-chat-api = { git = "https://git.woldtech.nl/woldtech/gemini-chat-api-rs.git" }
+gemini-chat-api = "0.1.0"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "multipart", "cookies"] }
 serde_json = "1.0"
