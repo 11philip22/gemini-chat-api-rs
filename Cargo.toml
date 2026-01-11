@@ -2,11 +2,11 @@
 name = "gemini-chat-api"
 version = "0.1.0"
 edition = "2021"
-description = "Async Rust client for Google Gemini Chat API"
+description = "Async Rust client for Google's internal Gemini Chat API"
 license = "MIT"
-repository = "https://github.com/OEvortex/Gemini-Chat-API"
-keywords = ["gemini", "google", "ai", "chat", "api"]
-categories = ["api-bindings", "asynchronous"]
+repository = "https://github.com/11philip22/gemini-chat-api-rs"
+keywords = ["gemini", "google", "generative-ai", "llm", "chatbot"]
+categories = ["api-bindings", "asynchronous", "web-programming::http-client"]
 
 [dependencies]
 reqwest = { version = "0.12", features = ["cookies", "json", "rustls-tls", "multipart"], default-features = false }
