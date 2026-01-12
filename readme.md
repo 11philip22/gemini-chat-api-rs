@@ -3,7 +3,9 @@
 [![Crates.io](https://img.shields.io/crates/v/gemini-chat-api.svg)](https://crates.io/crates/gemini-chat-api)
 [![Documentation](https://docs.rs/gemini-chat-api/badge.svg)](https://docs.rs/gemini-chat-api)
 
-This Rust crate provides an unofficial client for interacting with Google's internal Gemini API. It is a port of the [Python gemini-chat-api](https://github.com/OEvortex/Gemini-Chat-API) and is built using `reqwest` for efficient and authenticated HTTP requests.
+<img src="https://wp.bulksignature.com/wp-content/uploads/2024/02/Frame-876-1024x569.png" alt="Gemini" width="300">
+
+This Rust crate provides an unofficial client for interacting with Google's internal Gemini API, built using `reqwest` for efficient and authenticated HTTP requests.
 
 ## Features
 
@@ -99,6 +101,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 - **`enums`**: Defines `Endpoint`, `Headers`, and `Model` enums.
 - **`utils`**: Helpers like `load_cookies` and `upload_file`.
 - **`error`**: Custom `Error` types.
+
+## Acknowledgements
+
+This project is a Rust port of the [Python Gemini-Chat-API](https://github.com/OEvortex/Gemini-Chat-API) by [OEvortex](https://github.com/OEvortex). Special thanks to the original author for their work on reverse-engineering the Gemini API.
 
 ## License
 
