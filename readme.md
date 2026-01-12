@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/gemini-chat-api.svg)](https://crates.io/crates/gemini-chat-api)
 [![Documentation](https://docs.rs/gemini-chat-api/badge.svg)](https://docs.rs/gemini-chat-api)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <img src="https://wp.bulksignature.com/wp-content/uploads/2024/02/Frame-876-1024x569.png" alt="Gemini" width="300">
 
