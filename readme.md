@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/gemini-chat-api.svg)](https://crates.io/crates/gemini-chat-api)
 [![Documentation](https://docs.rs/gemini-chat-api/badge.svg)](https://docs.rs/gemini-chat-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/woldp001/guerrillamail-client-rs/pulls)
 
 <img src="https://wp.bulksignature.com/wp-content/uploads/2024/02/Frame-876-1024x569.png" alt="Gemini" width="300">
 
@@ -25,7 +26,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gemini-chat-api = "0.1.0"
+gemini-chat-api = "0.1.1"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "multipart", "cookies"] }
 serde_json = "1.0"
@@ -107,6 +108,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 This project is a Rust port of the [Python Gemini-Chat-API](https://github.com/OEvortex/Gemini-Chat-API) by [OEvortex](https://github.com/OEvortex). Special thanks to the original author for their work on reverse-engineering the Gemini API.
 
+## Contributing
+
+PRs are welcome!  
+Please run `cargo fmt` and `cargo clippy` before submitting.
+
+If you’re changing behavior, please document it in the PR.
+
+## Support
+
+If this crate saves you time or helps your work, support is appreciated:
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/11philip22)
+
 ## License
 
-This project is licensed under the MIT License - see the [license](license) file for details.
+This project is licensed under the MIT License; see the [license](license) file for details.
