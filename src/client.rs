@@ -1,4 +1,4 @@
-//! Async client for Google Gemini Chat API.
+//! Async client for Gemini web chat endpoints.
 
 use crate::enums::{gemini_headers, rotate_cookies_headers, Endpoint, Model};
 use crate::error::{Error, Result};
@@ -17,67 +17,85 @@ use std::time::Duration;
 
 const SNLM0E_PATTERN: &str = r#"["']SNlM0e["']\s*:\s*["']([^"']+)["']"#;
 
-/// Response from a chat request.
+/// Response returned by [`AsyncChatbot::ask`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatResponse {
-    /// The main text content of the response.
+    /// The primary response text.
     pub content: String,
-    /// Current conversation ID.
+    /// Conversation identifier returned by the server.
     pub conversation_id: String,
-    /// Current response ID.
+    /// Response identifier returned by the server.
     pub response_id: String,
-    /// Query used for factuality checking.
+    /// Optional structured data used by the backend for factuality checks.
     pub factuality_queries: Option<Value>,
-    /// Original text query.
+    /// The text query echoed by the backend.
     pub text_query: String,
-    /// Alternative response choices.
+    /// Alternative response choices returned by the backend.
     pub choices: Vec<Choice>,
-    /// Whether an error occurred.
+    /// Always `false` for successful responses.
+    ///
+    /// Errors are returned as [`Error`](crate::Error) instead of populating this field.
     pub error: bool,
 }
 
-/// An alternative response choice.
+/// An alternative response choice returned by the backend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Choice {
-    /// Choice identifier.
+    /// Backend choice identifier.
     pub id: String,
     /// Choice content text.
     pub content: String,
 }
 
-/// Saved conversation data for persistence.
+/// Persisted conversation state written by [`AsyncChatbot::save_conversation`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SavedConversation {
+    /// User-provided name used as the lookup key.
     pub conversation_name: String,
+    /// Internal request ID used by the backend.
     #[serde(rename = "_reqid")]
     pub reqid: u32,
+    /// Conversation identifier.
     pub conversation_id: String,
+    /// Response identifier.
     pub response_id: String,
+    /// Selected choice identifier.
     pub choice_id: String,
+    /// Session token required for requests.
     #[serde(rename = "SNlM0e")]
     pub snlm0e: String,
+    /// Model name string at the time of saving.
     pub model_name: String,
+    /// Seconds since UNIX epoch, as a string.
     pub timestamp: String,
 }
 
-/// Async chatbot client for interacting with Google Gemini.
+/// Async chatbot client for interacting with Gemini.
+///
+/// This client is stateful. Each successful call to [`ask`](Self::ask) updates
+/// internal conversation IDs so the next call continues the same thread. Call
+/// [`reset`](Self::reset) to start a new conversation while keeping cookies valid.
 ///
 /// # Example
 /// ```no_run
-/// use gemini_chat_api::{AsyncChatbot, Model};
+/// use gemini_chat_api::{load_cookies, AsyncChatbot, Model, Result};
 ///
 /// #[tokio::main]
-/// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-///     let chatbot = AsyncChatbot::new(
-///         "your_psid",
-///         "your_psidts",
-///         Model::default(),
-///         None,
-///         30,
-///     ).await?;
+/// async fn main() -> Result<()> {
+///     let (psid, psidts) = load_cookies("cookies.json")?;
+///     let mut chatbot = AsyncChatbot::new(&psid, &psidts, Model::default(), None, 30).await?;
 ///
-///     let response = chatbot.ask("Hello!", None).await?;
-///     println!("{}", response.content);
+///     // Continues the same conversation thread across calls.
+///     let first = chatbot.ask("Summarize Rust ownership in one paragraph.", None).await?;
+///     println!("{}", first.content);
+///
+///     let followup = chatbot.ask("Now give me a short code example.", None).await?;
+///     println!("{}", followup.content);
+///
+///     // Start a new conversation thread (cookies/session stay valid).
+///     chatbot.reset();
+///     let fresh = chatbot.ask("New topic: explain HTTP caching.", None).await?;
+///     println!("{}", fresh.content);
 ///     Ok(())
 /// }
 /// ```
@@ -94,20 +112,25 @@ pub struct AsyncChatbot {
 }
 
 impl AsyncChatbot {
-    /// Creates a new AsyncChatbot instance.
+    /// Creates a new `AsyncChatbot` instance and fetches the session token.
     ///
     /// # Arguments
-    /// * `secure_1psid` - The __Secure-1PSID cookie value
-    /// * `secure_1psidts` - The __Secure-1PSIDTS cookie value
-    /// * `model` - The Gemini model to use
-    /// * `proxy` - Optional proxy URL
+    /// * `secure_1psid` - The `__Secure-1PSID` cookie value
+    /// * `secure_1psidts` - The `__Secure-1PSIDTS` cookie value (may be empty)
+    /// * `model` - The model configuration to use
+    /// * `proxy` - Optional proxy URL (applied to all requests)
     /// * `timeout` - Request timeout in seconds
     ///
     /// # Returns
-    /// A new initialized AsyncChatbot
+    /// A fully initialized client with a valid session token.
     ///
     /// # Errors
-    /// Returns an error if authentication fails or network is unavailable.
+    /// Returns an error if authentication fails (`Error::Authentication`),
+    /// if the network request fails (`Error::Network`), or if the session token
+    /// cannot be extracted (`Error::Parse`).
+    ///
+    /// There is no retry or polling behavior; a single request is attempted.
+    /// Timeouts are handled by `reqwest` and surface as `Error::Network`.
     pub async fn new(
         secure_1psid: &str,
         secure_1psidts: &str,
@@ -255,14 +278,24 @@ impl AsyncChatbot {
         Ok(None)
     }
 
-    /// Sends a message to Gemini and returns the response.
+    /// Sends a message and returns the parsed response.
     ///
     /// # Arguments
     /// * `message` - The message text to send
-    /// * `image` - Optional image data to include
+    /// * `image` - Optional image bytes to upload and attach
     ///
     /// # Returns
-    /// A ChatResponse containing the Gemini reply and metadata
+    /// A [`ChatResponse`] containing the reply and metadata.
+    ///
+    /// # Errors
+    /// Returns an error if the client is not initialized (`Error::NotInitialized`),
+    /// if the image upload fails (`Error::Upload`), if the network request fails
+    /// (`Error::Network`), or if the backend response cannot be parsed
+    /// (`Error::Parse`).
+    ///
+    /// There is no retry or polling behavior. Timeouts are handled by `reqwest`
+    /// and surface as `Error::Network`. External failures (Gemini backend,
+    /// upload endpoint, or connectivity issues) are returned as errors.
     pub async fn ask(&mut self, message: &str, image: Option<&[u8]>) -> Result<ChatResponse> {
         if self.snlm0e.is_empty() {
             return Err(Error::NotInitialized(
@@ -477,7 +510,10 @@ impl AsyncChatbot {
         })
     }
 
-    /// Saves the current conversation to a file.
+    /// Saves the current conversation state to a JSON file.
+    ///
+    /// The file format is a JSON array of [`SavedConversation`] values. If an
+    /// entry with the same `conversation_name` already exists, it is replaced.
     pub async fn save_conversation(&self, file_path: &str, conversation_name: &str) -> Result<()> {
         let mut conversations = self.load_conversations(file_path).await?;
 
@@ -516,7 +552,9 @@ impl AsyncChatbot {
         Ok(())
     }
 
-    /// Loads all saved conversations from a file.
+    /// Loads all saved conversations from a JSON file.
+    ///
+    /// If the file does not exist, this returns an empty vector.
     pub async fn load_conversations(&self, file_path: &str) -> Result<Vec<SavedConversation>> {
         if !Path::new(file_path).exists() {
             return Ok(Vec::new());
@@ -527,7 +565,12 @@ impl AsyncChatbot {
         Ok(conversations)
     }
 
-    /// Loads a specific conversation by name.
+    /// Loads a specific conversation by name and applies it to this client.
+    ///
+    /// If the saved model name is unrecognized, the current model is left
+    /// unchanged.
+    ///
+    /// Returns `true` if the conversation was found and loaded.
     pub async fn load_conversation(
         &mut self,
         file_path: &str,
@@ -554,18 +597,19 @@ impl AsyncChatbot {
         Ok(false)
     }
 
-    /// Gets the current conversation ID.
+    /// Returns the current conversation ID.
     pub fn conversation_id(&self) -> &str {
         &self.conversation_id
     }
 
-    /// Gets the current model.
+    /// Returns the current model configuration.
     pub fn model(&self) -> &Model {
         &self.model
     }
 
-    /// Resets the conversation state (IDs) to start a fresh conversation session.
-    /// This keeps authentication valid (SNlM0e, cookies) but generates new conversation IDs.
+    /// Resets conversation IDs to start a fresh session.
+    ///
+    /// Authentication (cookies and session token) is preserved.
     pub fn reset(&mut self) {
         self.conversation_id.clear();
         self.response_id.clear();

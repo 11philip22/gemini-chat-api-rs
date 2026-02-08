@@ -24,6 +24,8 @@ struct CookieEntry {
 /// ]
 /// ```
 ///
+/// Cookie names are matched case-insensitively.
+///
 /// # Arguments
 /// * `cookie_path` - Path to the JSON cookie file
 ///
@@ -67,7 +69,7 @@ pub fn load_cookies(cookie_path: &str) -> Result<(String, String)> {
     }
 }
 
-/// Uploads a file to Google's Gemini server and returns its identifier.
+/// Uploads a file to the Gemini upload endpoint and returns the raw response text.
 ///
 /// # Arguments
 /// * `file_data` - The file content as bytes
@@ -77,7 +79,11 @@ pub fn load_cookies(cookie_path: &str) -> Result<(String, String)> {
 /// The file identifier string from the server
 ///
 /// # Errors
-/// Returns an error if the upload fails.
+/// Returns `Error::Upload` if the request fails, the response status is not
+/// successful, or the response body cannot be read.
+///
+/// There is no retry or polling behavior. External failures (upload endpoint
+/// availability or connectivity issues) are returned as errors.
 pub async fn upload_file(file_data: &[u8], proxy: Option<&str>) -> Result<String> {
     let mut builder = Client::builder();
 
@@ -114,7 +120,9 @@ pub async fn upload_file(file_data: &[u8], proxy: Option<&str>) -> Result<String
     Ok(text)
 }
 
-/// Loads cookies from file and returns them as a HashMap for reqwest.
+/// Returns a simple cookie map suitable for manual `reqwest` usage.
+///
+/// This helper does not perform any I/O and does not validate the values.
 pub fn cookies_to_map(secure_1psid: &str, secure_1psidts: &str) -> HashMap<String, String> {
     let mut map = HashMap::new();
     map.insert("__Secure-1PSID".to_string(), secure_1psid.to_string());

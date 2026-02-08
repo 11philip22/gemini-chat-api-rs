@@ -1,16 +1,16 @@
-//! Enums and constants for Gemini API endpoints, headers, and models.
+//! Enums and constants for Gemini endpoints, headers, and models.
 
 use reqwest::header::{
     HeaderMap, HeaderName, HeaderValue, ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, ORIGIN, REFERER,
     USER_AGENT,
 };
 
-/// API endpoints for Google Gemini.
+/// Gemini web endpoints used by this crate.
 #[derive(Debug, Clone, Copy)]
 pub enum Endpoint {
-    /// Initialize session and get SNlM0e token.
+    /// Initialize session and obtain the `SNlM0e` token.
     Init,
-    /// Generate chat response.
+    /// Generate a chat response.
     Generate,
     /// Rotate authentication cookies.
     RotateCookies,
@@ -19,7 +19,7 @@ pub enum Endpoint {
 }
 
 impl Endpoint {
-    /// Get the URL for this endpoint.
+    /// Returns the URL for this endpoint.
     pub fn url(&self) -> &'static str {
         match self {
             Endpoint::Init => "https://gemini.google.com/app",
@@ -30,7 +30,10 @@ impl Endpoint {
     }
 }
 
-/// Get headers for Gemini chat requests.
+/// Returns default headers used by chat requests.
+///
+/// These headers mimic a modern browser; the web endpoint may reject requests
+/// without them.
 pub fn gemini_headers() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(
@@ -87,14 +90,16 @@ pub fn gemini_headers() -> HeaderMap {
     headers
 }
 
-/// Get headers for cookie rotation requests.
+/// Returns headers for cookie rotation requests.
 pub fn rotate_cookies_headers() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
     headers
 }
 
-/// Get headers for file upload requests.
+/// Returns headers for file upload requests.
+///
+/// The `push-id` value is hard-coded to match the web endpoint's expectations.
 pub fn upload_headers() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert(
@@ -104,34 +109,37 @@ pub fn upload_headers() -> HeaderMap {
     headers
 }
 
-/// Available Gemini model configurations.
+/// Available model configurations.
+///
+/// This enum controls both the model name and the extra header value used by
+/// the web endpoint.
 #[derive(Debug, Clone, Default)]
 pub enum Model {
     /// Unspecified model - uses default.
     #[default]
     Unspecified,
-    /// Gemini 2.0 Flash
+    /// Gemini 2.0 Flash.
     G2_0Flash,
-    /// Gemini 2.0 Flash Thinking
+    /// Gemini 2.0 Flash Thinking.
     G2_0FlashThinking,
-    /// Gemini 2.5 Flash
+    /// Gemini 2.5 Flash.
     G2_5Flash,
-    /// Gemini 2.5 Pro
+    /// Gemini 2.5 Pro.
     G2_5Pro,
-    /// Gemini 2.0 Experimental Advanced (requires advanced subscription)
+    /// Gemini 2.0 Experimental Advanced (requires advanced subscription).
     G2_0ExpAdvanced,
-    /// Gemini 2.5 Experimental Advanced (requires advanced subscription)
+    /// Gemini 2.5 Experimental Advanced (requires advanced subscription).
     G2_5ExpAdvanced,
-    /// Gemini 3.0 Pro
+    /// Gemini 3.0 Pro.
     G3_0Pro,
-    /// Gemini 3.0 Flash
+    /// Gemini 3.0 Flash.
     G3_0Flash,
-    /// Gemini 3.0 Flash Thinking
+    /// Gemini 3.0 Flash Thinking.
     G3_0Thinking,
 }
 
 impl Model {
-    /// Get the model name string.
+    /// Returns the model name string used in saved conversation data.
     pub fn name(&self) -> &'static str {
         match self {
             Model::Unspecified => "unspecified",
@@ -147,7 +155,10 @@ impl Model {
         }
     }
 
-    /// Get model-specific headers (for x-goog-ext-525001261-jspb header).
+    /// Returns model-specific headers for the web endpoint.
+    ///
+    /// The header key is `x-goog-ext-525001261-jspb`. `Model::Unspecified`
+    /// returns `None`, which means no extra model header is added.
     pub fn headers(&self) -> Option<HeaderMap> {
         let header_value = match self {
             Model::Unspecified => return None,
@@ -176,12 +187,27 @@ impl Model {
         Some(headers)
     }
 
-    /// Whether this model requires advanced subscription.
+    /// Returns `true` if this model requires an advanced subscription.
     pub fn is_advanced_only(&self) -> bool {
         matches!(self, Model::G2_0ExpAdvanced | Model::G2_5ExpAdvanced)
     }
 
-    /// Create model from name string.
+    /// Creates a model from a name string.
+    ///
+    /// Accepted names are:
+    /// - `unspecified`
+    /// - `gemini-2.0-flash`
+    /// - `gemini-2.0-flash-thinking`
+    /// - `gemini-2.5-flash`
+    /// - `gemini-2.5-pro`
+    /// - `gemini-2.0-exp-advanced`
+    /// - `gemini-2.5-exp-advanced`
+    /// - `gemini-3.0-pro`
+    /// - `gemini-3.0-flash`
+    /// - `gemini-3.0-thinking`
+    ///
+    /// Note that `gemini-3.0-thinking` maps to [`Model::G3_0Thinking`], while
+    /// [`Model::name`] for that variant returns `gemini-3.0-flash-thinking`.
     pub fn from_name(name: &str) -> Option<Self> {
         match name {
             "unspecified" => Some(Model::Unspecified),

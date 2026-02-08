@@ -1,11 +1,11 @@
-//! Error types for the Gemini Chat API client.
+//! Error types for this crate.
 
 use thiserror::Error;
 
-/// Main error type for the Gemini client.
+/// Main error type for Gemini client operations.
 #[derive(Error, Debug)]
 pub enum Error {
-    /// Authentication failed - cookies are invalid or expired.
+    /// Authentication failed (invalid or expired cookies, or login redirect).
     #[error("Authentication failed: {0}")]
     Authentication(String),
 
@@ -13,11 +13,14 @@ pub enum Error {
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
 
-    /// Failed to parse response from Gemini.
+    /// Failed to parse a response from the web endpoint.
     #[error("Parse error: {0}")]
     Parse(String),
 
     /// Request timed out.
+    ///
+    /// Note: the current implementation uses `reqwest` timeouts, which are
+    /// reported as `Error::Network` rather than this variant.
     #[error("Request timed out")]
     Timeout,
 
@@ -42,5 +45,5 @@ pub enum Error {
     Upload(String),
 }
 
-/// Result type alias for Gemini operations.
+/// Result type alias for this crate.
 pub type Result<T> = std::result::Result<T, Error>;
