@@ -97,23 +97,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
 }
 ```
 
-## Modules
+## Documentation
 
-- **`client`**: Contains the `AsyncChatbot` struct for managing sessions.
-- **`enums`**: Defines `Endpoint`, `Headers`, and `Model` enums.
-- **`utils`**: Helpers like `load_cookies` and `upload_file`.
-- **`error`**: Custom `Error` types.
+For detailed API documentation, visit [docs.rs/gemini-chat-api](https://docs.rs/gemini-chat-api).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/cool-feature`)
+3. Commit your changes (`git commit -m 'Add some cool feature'`)
+4. Push to the branch (`git push origin feature/cool-feature`)
+5. Open a Pull Request
 
 ## Acknowledgements
 
 This project is a Rust port of the [Python Gemini-Chat-API](https://github.com/OEvortex/Gemini-Chat-API) by [OEvortex](https://github.com/OEvortex). Special thanks to the original author for their work on reverse-engineering the Gemini API.
-
-## Contributing
-
-PRs are welcome!  
-Please run `cargo fmt` and `cargo clippy` before submitting.
-
-If you’re changing behavior, please document it in the PR.
 
 ## Support
 
