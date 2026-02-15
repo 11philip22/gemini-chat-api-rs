@@ -26,10 +26,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gemini-chat-api = "0.1.1"
-tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.12", features = ["json", "multipart", "cookies"] }
-serde_json = "1.0"
+gemini-chat-api = "0.1.4"
 ```
 
 (Or path dependency if working locally)
