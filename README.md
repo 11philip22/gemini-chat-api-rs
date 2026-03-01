@@ -1,13 +1,19 @@
-# Gemini Chat API (Rust)
+<p align="center">
+  <img src="assets/hero-banner.png" alt="hero pane" width="980">
+</p>
 
-[![Crates.io](https://img.shields.io/crates/v/gemini-chat-api.svg)](https://crates.io/crates/gemini-chat-api)
-[![Documentation](https://docs.rs/gemini-chat-api/badge.svg)](https://docs.rs/gemini-chat-api)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/woldp001/guerrillamail-client-rs/pulls)
+<p align="center">
+  <a href="https://crates.io/crates/gemini-chat-api"><img src="https://img.shields.io/badge/crates.io-gemini--chat--api-F59E0B?style=for-the-badge&logo=rust&logoColor=white" alt="Crates.io"></a>
+  <a href="https://docs.rs/gemini-chat-api"><img src="https://img.shields.io/badge/docs.rs-gemini--chat--api-3B82F6?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Documentation"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-8B5CF6?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://github.com/woldp001/guerrillamail-client-rs/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-22C55E?style=for-the-badge" alt="PRs Welcome"></a>
+</p>
 
-<img src="https://wp.bulksignature.com/wp-content/uploads/2024/02/Frame-876-1024x569.png" alt="Gemini" width="300">
+<p align="center">
+  <a href="#features">Features</a> · <a href="#installation">Installation</a> · <a href="#usage">Usage</a> · <a href="#quick-start">Quick Start</a> · <a href="#documentation">Documentation</a> · <a href="#contributing">Contributing</a> · <a href="#acknowledgements">Acknowledgements</a> · <a href="#support">Support</a> · <a href="#license">License</a>
+</p>
 
-This Rust crate provides an unofficial client for interacting with Google's internal Gemini API, built using `reqwest` for efficient and authenticated HTTP requests.
+---
 
 ## Features
 
@@ -120,4 +126,4 @@ If this crate saves you time or helps your work, support is appreciated:
 
 ## License
 
-This project is licensed under the MIT License; see the [license](license) file for details.
+This project is licensed under the MIT License; see the [license](https://opensource.org/licenses/MIT) for details.

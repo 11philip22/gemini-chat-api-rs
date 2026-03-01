@@ -1,6 +1,6 @@
 [package]
 name = "gemini-chat-api"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 description = "Async Rust client for Google's internal Gemini Chat API"
 license = "MIT"
