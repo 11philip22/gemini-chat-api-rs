@@ -1,129 +1,165 @@
+<h1 align="center">gemini-chat-api</h1>
+
 <p align="center">
-  <img src="assets/hero-banner.png" alt="hero pane" width="980">
+  <strong>Async Rust client for Google's Gemini web chat endpoints.</strong>
 </p>
 
 <p align="center">
-  <a href="https://crates.io/crates/gemini-chat-api"><img src="https://img.shields.io/badge/crates.io-gemini--chat--api-F59E0B?style=for-the-badge&logo=rust&logoColor=white" alt="Crates.io"></a>
-  <a href="https://docs.rs/gemini-chat-api"><img src="https://img.shields.io/badge/docs.rs-gemini--chat--api-3B82F6?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Documentation"></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-8B5CF6?style=for-the-badge" alt="MIT License"></a>
-  <a href="https://github.com/woldp001/guerrillamail-client-rs/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-22C55E?style=for-the-badge" alt="PRs Welcome"></a>
+  <a href="https://crates.io/crates/gemini-chat-api"><img src="https://img.shields.io/crates/v/gemini-chat-api?style=for-the-badge&logo=rust&label=crates.io&color=F59E0B" alt="Crates.io"></a>
+  <a href="https://docs.rs/gemini-chat-api"><img src="https://img.shields.io/docsrs/gemini-chat-api?style=for-the-badge&logo=readthedocs&label=docs.rs&color=3B82F6" alt="docs.rs"></a>
+  <a href="https://github.com/11philip22/gemini-chat-api-rs"><img src="https://img.shields.io/badge/repo-github-181717?style=for-the-badge&logo=github" alt="GitHub repository"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge" alt="MIT License"></a>
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> · <a href="#installation">Installation</a> · <a href="#usage">Usage</a> · <a href="#quick-start">Quick Start</a> · <a href="#documentation">Documentation</a> · <a href="#contributing">Contributing</a> · <a href="#acknowledgements">Acknowledgements</a> · <a href="#support">Support</a> · <a href="#license">License</a>
+  <a href="#features">Features</a>
+  &middot;
+  <a href="#installation">Installation</a>
+  &middot;
+  <a href="#authentication">Authentication</a>
+  &middot;
+  <a href="#quick-start">Quick Start</a>
+  &middot;
+  <a href="#image-input">Image Input</a>
+  &middot;
+  <a href="#conversation-state">Conversation State</a>
+  &middot;
+  <a href="#models">Models</a>
 </p>
 
 ---
 
+`gemini-chat-api` is an async Rust client for the same Gemini web chat endpoints used by the browser UI. It authenticates with Gemini cookies, sends text prompts, optionally uploads image bytes, and keeps conversation metadata so follow-up messages continue the same thread.
+
+> [!IMPORTANT]
+> This crate talks to Gemini's web endpoints, not the official Google Gemini API. Endpoint behavior can change without notice, and valid browser cookies are required.
+
 ## Features
 
-- **Asynchronous**: Built on `tokio` and `reqwest` for non-blocking I/O.
-- **Conversation Management**: Maintains chat history and context.
-- **File & Image Uploads**: Support for sending images and files in prompts.
-- **Multiple Models**: Support for Gemini 2.0 Flash, 2.5 Pro, and others.
-- **Auto-Rotation**: Automatically rotates cookies to keep the session alive.
-- **Browser Impersonation**: Mimics Chrome headers to ensure successful authentication.
-
-> **Note**: Image generation and downloading features from the Python library are **not** supported in this Rust port. This client focuses on chat and text interaction.
+- Async-first client built on `tokio` and `reqwest`.
+- Cookie-based authentication with `__Secure-1PSID` and `__Secure-1PSIDTS`.
+- Stateful conversations across multiple `ask` calls.
+- Optional image upload support for multimodal prompts.
+- Selectable Gemini model headers, including Flash, Pro, and thinking variants.
+- Proxy and timeout configuration through the client constructor.
+- JSON save/load helpers for conversation state.
 
 ## Installation
 
-Add the following to your `Cargo.toml`:
+Add the crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gemini-chat-api = "0.1.4"
+gemini-chat-api = "0.1.5"
+tokio = { version = "1", features = ["full"] }
 ```
 
-(Or path dependency if working locally)
+## Authentication
 
-## Usage
-
-### Prerequisites
-
-You need to obtain your `__Secure-1PSID` and `__Secure-1PSIDTS` cookies from Google Gemini.
-
-1.  Go to [https://gemini.google.com/app](https://gemini.google.com/app)
-2.  Open your browser's developer tools (F12).
-3.  Go to the "Application" (or "Storage") tab.
-4.  Under "Cookies" -> "https://gemini.google.com", find the `__Secure-1PSID` and `__Secure-1PSIDTS` cookies.
-5.  Create a JSON file (e.g., `cookies.json`) with the following format:
+Export the required cookies from an authenticated Gemini browser session at [gemini.google.com](https://gemini.google.com/app):
 
 ```json
 [
-    {
-        "name": "__Secure-1PSID",
-        "value": "YOUR_VALUE_HERE"
-    },
-    {
-        "name": "__Secure-1PSIDTS",
-        "value": "YOUR_VALUE_HERE"
-    }
+  {
+    "name": "__Secure-1PSID",
+    "value": "YOUR_VALUE_HERE"
+  },
+  {
+    "name": "__Secure-1PSIDTS",
+    "value": "YOUR_VALUE_HERE"
+  }
 ]
 ```
 
-### Quick Start
+Save them as `cookies.json`, then load them with `load_cookies`.
+
+> [!CAUTION]
+> Treat `cookies.json` like a password. Do not commit it or share it.
+
+## Quick Start
 
 ```rust
-use gemini_chat_api::{utils::load_cookies, AsyncChatbot, Model};
-use std::error::Error;
+use gemini_chat_api::{load_cookies, AsyncChatbot, Model, Result};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    // Load cookies from file
-    let (secure_1psid, secure_1psidts) = load_cookies("cookies.json")?;
+async fn main() -> Result<()> {
+    let (psid, psidts) = load_cookies("cookies.json")?;
+    let mut chatbot = AsyncChatbot::new(&psid, &psidts, Model::G3_0Pro, None, 30).await?;
 
-    println!("Cookies loaded successfully.");
-
-    // Initialize chatbot with 30s timeout
-    let mut chatbot = AsyncChatbot::new(
-        &secure_1psid,
-        &secure_1psidts,
-        Model::G2_5Pro,
-        None, // No proxy
-        30,   // Timeout in seconds
-    )
-    .await?;
-
-    println!("Chatbot initialized.");
-
-    // Ask a question
-    println!("Sending message: 'Hello from Rust example!'");
-    let response = chatbot.ask("Hello from Rust example!", None).await?;
-
-    println!("--------------------------------------------------");
-    println!("Gemini Response:");
+    let response = chatbot.ask("Hello from Rust.", None).await?;
     println!("{}", response.content);
-    println!("--------------------------------------------------");
 
     Ok(())
 }
 ```
 
-## Documentation
+Run the included interactive example:
 
-For detailed API documentation, visit [docs.rs/gemini-chat-api](https://docs.rs/gemini-chat-api).
+```bash
+cargo run --example chat
+```
 
-## Contributing
+## Image Input
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Pass image bytes as the second argument to `ask`:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/cool-feature`)
-3. Commit your changes (`git commit -m 'Add some cool feature'`)
-4. Push to the branch (`git push origin feature/cool-feature`)
-5. Open a Pull Request
+```rust
+use gemini_chat_api::{load_cookies, AsyncChatbot, Model, Result};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let (psid, psidts) = load_cookies("cookies.json")?;
+    let mut chatbot = AsyncChatbot::new(&psid, &psidts, Model::default(), None, 30).await?;
+
+    let image = std::fs::read("image.png")?;
+    let response = chatbot.ask("Describe this image.", Some(&image)).await?;
+    println!("{}", response.content);
+
+    Ok(())
+}
+```
+
+## Conversation State
+
+`AsyncChatbot` keeps the latest conversation IDs internally, so follow-up prompts continue the same Gemini thread:
+
+```rust
+let first = chatbot.ask("Explain Rust ownership in one paragraph.", None).await?;
+let second = chatbot.ask("Now give me a short example.", None).await?;
+
+chatbot.reset();
+let fresh = chatbot.ask("Start a new topic.", None).await?;
+```
+
+You can also persist and restore conversations:
+
+```rust
+chatbot.save_conversation("data/conversations.json", "rust-notes").await?;
+let loaded = chatbot.load_conversation("data/conversations.json", "rust-notes").await?;
+```
+
+## Models
+
+Use `Model::default()` for the endpoint default, or select a specific model:
+
+```rust
+use gemini_chat_api::Model;
+
+let model = Model::G3_0Pro;
+```
+
+Available variants include:
+
+- `Model::G2_0Flash`
+- `Model::G2_0FlashThinking`
+- `Model::G2_5Flash`
+- `Model::G2_5Pro`
+- `Model::G2_0ExpAdvanced`
+- `Model::G2_5ExpAdvanced`
+- `Model::G3_0Pro`
+- `Model::G3_0Flash`
+- `Model::G3_0Thinking`
 
 ## Acknowledgements
 
-This project is a Rust port of the [Python Gemini-Chat-API](https://github.com/OEvortex/Gemini-Chat-API) by [OEvortex](https://github.com/OEvortex). Special thanks to the original author for their work on reverse-engineering the Gemini API.
-
-## Support
-
-If this crate saves you time or helps your work, support is appreciated:
-
-[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/11philip22)
-
-## License
-
-This project is licensed under the MIT License; see the [license](https://opensource.org/licenses/MIT) for details.
+This crate is a Rust port inspired by [OEvortex/Gemini-Chat-API](https://github.com/OEvortex/Gemini-Chat-API).
